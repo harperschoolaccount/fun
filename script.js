@@ -10,7 +10,7 @@
    • Favorites (★) and Recently played (🕘) are saved in
      localStorage on this browser.
    • Games open inside game.html, which wraps them in a frame with
-     a back / reload / fullscreen / device-info toolbar.
+     a back / reload / fullscreen toolbar.
    ============================================================ */
 
 'use strict';
@@ -46,6 +46,28 @@ function safeWrite(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode etc. */ }
 }
 
+/* ---------------- Back navigation ---------------- */
+
+// Defined globally so the legacy game wrappers (whose Home buttons call
+// goBack()) always work — whether loaded standalone or inside the
+// game.html viewer frame.
+window.goBack = function () {
+  let w = window;
+  try {
+    if (window.parent && window.parent !== window) {
+      // Inside the viewer's frame: send the parent back instead, so the
+      // toolbar stays out of the returned page.
+      w = window.parent;
+      if (w.history.length > 1 && w.document.referrer) { w.history.back(); return; }
+    }
+  } catch { /* cross-origin parent — fall through */ }
+  if (history.length > 1 && document.referrer) {
+    history.back();
+  } else {
+    window.location.href = '/';
+  }
+};
+
 /* ---------------- Toast ---------------- */
 
 let toastTimer;
@@ -68,10 +90,13 @@ if (grid) {
   const countEl     = $('#gameCount');
   const chips       = $$('#chips .chip');
 
-  let favorites = safeRead('zh_favs', []);      // array of game urls
-  let recents   = safeRead('zh_recents', []);   // array of game urls, newest first
+  // Guard against corrupt or tampered localStorage payloads
+  const asUrlList = v => Array.isArray(v) ? v.filter(u => typeof u === 'string') : [];
+  let favorites = asUrlList(safeRead('zh_favs', []));      // array of game urls
+  let recents   = asUrlList(safeRead('zh_recents', []));   // array of game urls, newest first
   let filter    = 'all';
   let firstRender = true;
+  let lastRenderKey = null;
 
   const isFav = url => favorites.includes(url);
 
@@ -86,7 +111,7 @@ if (grid) {
       ? `<img class="card-img" src="${game.image}" alt="" loading="lazy" decoding="async" onerror="this.remove()">`
       : '';
     const letter = game.title.trim().charAt(0).toUpperCase();
-    const flag   = filter === 'all' && recents[0] === game.url ? '<div class="card-flag">🕘 Recent</div>' : '';
+    const flag   = filter === 'all' && recents[0] === game.url ? '<div class="card-flag">Recent</div>' : '';
     const fav    = isFav(game.url);
     const delay  = firstRender ? ` style="--d:${Math.min(index * 45, 450)}ms"` : '';
     return `<a class="card" href="game.html?game=${encodeURIComponent(game.url)}" data-url="${game.url}"${delay}>
@@ -106,17 +131,17 @@ if (grid) {
 
   function emptyHTML() {
     const q = searchInput.value.trim();
-    let big, line1, line2;
+    let line1, line2;
     if (filter === 'favorites' && !favorites.length) {
-      [big, line1, line2] = ['☆', 'No favorites yet', 'Hit the star on any game to pin it here.'];
+      [line1, line2] = ['No favorites yet', 'Hit the star on any game to pin it here.'];
     } else if (filter === 'recent' && !recents.length) {
-      [big, line1, line2] = ['🕘', 'No history yet', 'Games you open will show up here.'];
+      [line1, line2] = ['No history yet', 'Games you open will show up here.'];
     } else if (q) {
-      [big, line1, line2] = ['🔍', 'No games found', `Nothing matches \u201C${q}\u201D.`];
+      [line1, line2] = ['No games found', `Nothing matches \u201C${q}\u201D.`];
     } else {
-      [big, line1, line2] = ['👾', 'Nothing here', 'Try a different filter.'];
+      [line1, line2] = ['Nothing here', 'Try a different filter.'];
     }
-    return `<div class="empty"><span class="big">${big}</span><p><strong>${line1}</strong><br>${line2}</p></div>`;
+    return `<div class="empty"><p><strong>${line1}</strong><br>${line2}</p></div>`;
   }
 
   function refreshChips() {
@@ -137,11 +162,18 @@ if (grid) {
         .filter(Boolean);
     }
 
+    // Only touch the DOM when the visible list actually changes —
+    // skips redundant rebuilds (and image re-fetch flashes) while typing.
+    const key = list.length
+      ? `${filter}:${list.map(g => g.url).join('|')}`
+      : `empty:${filter}:${q}`;
+    firstRender = false;
+    if (key === lastRenderKey) return;
+    lastRenderKey = key;
+
     grid.innerHTML = list.length
       ? list.map(cardHTML).join('')
       : emptyHTML();
-
-    firstRender = false;
 
     if (countEl) {
       countEl.textContent = `${list.length} game${list.length === 1 ? '' : 's'}` +
@@ -230,16 +262,7 @@ if (frame) {
     if (titleEl) titleEl.textContent = 'No game selected';
   }
 
-  function goBack() {
-    if (history.length > 1 && document.referrer) {
-      history.back();
-    } else {
-      window.location.href = '/';
-    }
-  }
-  window.goBack = goBack; // kept for older pages that call goBack()
-
-  $('#backBtn')?.addEventListener('click', goBack);
+  $('#backBtn')?.addEventListener('click', window.goBack);
   $('#reloadBtn')?.addEventListener('click', () => {
     try {
       frame.contentWindow.location.reload();
@@ -250,83 +273,22 @@ if (frame) {
 
   $('#fullscreenBtn')?.addEventListener('click', toggleFullscreen);
   function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      frame.requestFullscreen?.().catch(() => {});
-    } else {
+    if (document.fullscreenElement) {
       document.exitFullscreen?.();
+    } else {
+      frame.requestFullscreen?.().catch(() => {});
     }
   }
 
-  let autoHideTimer;
-  const watermark = $('#deviceWatermark');
   function setTopbar(on) {
     document.body.classList.toggle('topbar-hidden', !on);
   }
   $('#hideBarBtn')?.addEventListener('click', () => setTopbar(false));
   $('#showBarBtn')?.addEventListener('click', () => setTopbar(true));
 
-  $('#infoBtn')?.addEventListener('click', () => {
-    clearTimeout(autoHideTimer);
-    watermark?.classList.toggle('hidden');
-  });
-
   document.addEventListener('keydown', e => {
     if (e.key.toLowerCase() === 'h' && !e.ctrlKey && !e.metaKey) setTopbar(!document.body.classList.contains('topbar-hidden'));
     if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey) toggleFullscreen();
   });
-
-  // Show device info briefly on open, then fade it out of the way
-  watermark?.classList.remove('hidden');
-  autoHideTimer = setTimeout(() => watermark?.classList.add('hidden'), 6000);
 }
 
-/* ============================================================
-   DEVICE-INFO WATERMARK (any page containing #deviceWatermark)
-   ============================================================ */
-
-const watermarkEl = document.getElementById('deviceWatermark');
-if (watermarkEl) {
-  let frames = 0, lastTick = performance.now(), fps = 60;
-
-  function tickFPS(now) {
-    frames++;
-    if (now - lastTick >= 500) {
-      fps = Math.round(frames * 1000 / (now - lastTick));
-      frames = 0;
-      lastTick = now;
-    }
-    requestAnimationFrame(tickFPS);
-  }
-  requestAnimationFrame(tickFPS);
-
-  let batteryAsked = false;
-  let battery = 'N/A';
-
-  function updateDeviceInfo() {
-    const nav = navigator;
-    if (typeof nav.getBattery === 'function' && !batteryAsked) {
-      batteryAsked = true;
-      nav.getBattery().then(b => {
-        battery = `${Math.round(b.level * 100)}%${b.charging ? ' ⚡' : ''}`;
-      }).catch(() => {});
-    }
-    const mem = nav.deviceMemory !== undefined ? `${nav.deviceMemory} GB` : 'N/A';
-    const conn = nav.connection && nav.connection.effectiveType ? nav.connection.effectiveType : 'N/A';
-
-    watermarkEl.textContent =
-`— zj71's benchmarker —
-TIME      ${new Date().toLocaleTimeString()}
-FPS       ${fps}
-
-PLATFORM  ${nav.platform}
-CPU       ${nav.hardwareConcurrency || '?'} cores · RAM ${mem}
-TOUCH     ${nav.maxTouchPoints > 0 ? 'yes' : 'no'}
-DISPLAY   ${screen.width}×${screen.height} @ ${window.devicePixelRatio}x
-
-NETWORK   ${conn}
-BATTERY   ${battery}`;
-  }
-
-  setInterval(updateDeviceInfo, 500);
-  updateDeviceInfo();
-}
