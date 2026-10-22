@@ -4,8 +4,10 @@
    ADDING A NEW GAME: add one line to the GAMES array below:
 
      { title: 'My Game', desc: 'Short description',
-       url: '/games/my-game/index.html', image: 'https://...' }
+       url: 'games/my-game/index.html', image: 'https://...' }
 
+   • Paths are relative to this file — no leading slash — so the
+     hub works whether it's hosted at the domain root or a subfolder.
    • image is optional — a generated gradient tile is used instead.
    • Favorites (★) and Recently played (🕘) are saved in
      localStorage on this browser.
@@ -18,17 +20,17 @@
 /* ---------------- Data ---------------- */
 
 const GAMES = [
-  { title: 'Tab Chats',               desc: 'The ultimate LAN chatting platform', url: '/games/tc/index.html',            image: 'https://static.vecteezy.com/system/resources/thumbnails/006/692/321/small/chatting-message-icon-template-black-color-editable-chatting-message-icon-symbol-flat-illustration-for-graphic-and-web-design-free-vector.jpg' },
-  { title: 'Random',                  desc: 'Random Shit',                        url: '/games/random/',                  image: '' },
-  { title: 'Five Nights at Freddy\'s',desc: 'Survive five spooky nights',         url: '/games/fnaf/index.html',          image: 'https://play-lh.googleusercontent.com/myJ2kwywsCRglKkZuHBq6Aku9PX7HB75v-8KbnTK9JOPU6z0hpD9xtvjiTGqrn-e4eI' },
-  { title: 'Legion Platforms',        desc: 'Jump across the platforms',          url: '/games/legion platforms/index.html', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMWJcFGLcnAWw-OyIklj9vSImhot9Qja_oVA&s' },
-  { title: 'Minecraft',               desc: 'Classic sandbox building',           url: '/games/mc/index.html',            image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b6/Minecraft_2024_cover_art.png/250px-Minecraft_2024_cover_art.png' },
-  { title: 'Geometry Dash',           desc: 'One-touch rhythm platformer',        url: '/games/gd/index.html',            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCUiJgoAoVVcg9FA3_3NHHC4SkocpWthaYbg&s' },
-  { title: 'Among Us',                desc: 'Find the impostor',                  url: '/games/Among Us.html',            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSL4pC911RR8_8f9fN7T2AYbgBWfH-lv8DX7w&s' },
-  { title: 'Rob a Brainrot 2',        desc: 'The sequel heist',                   url: '/games/Rob a Brainrot 2.html',    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdLxerHkBauEVpdGPdD-GOR2he4ASkez8ylQ&s' },
-  { title: 'Happy Wheels',            desc: 'Physics-based mayhem',               url: '/games/Happy Wheels.html',        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWcm4QoLNNEvP5lvZKJg9WgFLV_UW25k31GQ&s' },
-  { title: 'Plants vs Brainrots',     desc: 'Defend the garden',                  url: '/games/Plants vs Brainrots.html', image: 'https://growagardenio.io/data/image/game/PlantsvsBrainrots.png' },
-  { title: 'Steal Brainrots',         desc: 'Brainrot heist',                     url: '/games/Steal Brainrots.html',     image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZJc5XiKDhpXf5bxAcVmZRGS_tTTElL0eIKw&s' },
+  { title: 'Tab Chats',               desc: 'The ultimate LAN chatting platform', url: 'games/tc/index.html',            image: 'https://static.vecteezy.com/system/resources/thumbnails/006/692/321/small/chatting-message-icon-template-black-color-editable-chatting-message-icon-symbol-flat-illustration-for-graphic-and-web-design-free-vector.jpg' },
+  { title: 'Random',                  desc: 'Random Shit',                        url: 'games/random/',                  image: '' },
+  { title: 'Five Nights at Freddy\'s',desc: 'Survive five spooky nights',         url: 'games/fnaf/index.html',          image: 'https://play-lh.googleusercontent.com/myJ2kwywsCRglKkZuHBq6Aku9PX7HB75v-8KbnTK9JOPU6z0hpD9xtvjiTGqrn-e4eI' },
+  { title: 'Legion Platforms',        desc: 'Jump across the platforms',          url: 'games/legion platforms/index.html', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMWJcFGLcnAWw-OyIklj9vSImhot9Qja_oVA&s' },
+  { title: 'Minecraft',               desc: 'Classic sandbox building',           url: 'games/mc/index.html',            image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b6/Minecraft_2024_cover_art.png/250px-Minecraft_2024_cover_art.png' },
+  { title: 'Geometry Dash',           desc: 'One-touch rhythm platformer',        url: 'games/gd/index.html',            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCUiJgoAoVVcg9FA3_3NHHC4SkocpWthaYbg&s' },
+  { title: 'Among Us',                desc: 'Find the impostor',                  url: 'games/Among Us.html',            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSL4pC911RR8_8f9fN7T2AYbgBWfH-lv8DX7w&s' },
+  { title: 'Rob a Brainrot 2',        desc: 'The sequel heist',                   url: 'games/Rob a Brainrot 2.html',    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdLxerHkBauEVpdGPdD-GOR2he4ASkez8ylQ&s' },
+  { title: 'Happy Wheels',            desc: 'Physics-based mayhem',               url: 'games/Happy Wheels.html',        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWcm4QoLNNEvP5lvZKJg9WgFLV_UW25k31GQ&s' },
+  { title: 'Plants vs Brainrots',     desc: 'Defend the garden',                  url: 'games/Plants vs Brainrots.html', image: 'https://growagardenio.io/data/image/game/PlantsvsBrainrots.png' },
+  { title: 'Steal Brainrots',         desc: 'Brainrot heist',                     url: 'games/Steal Brainrots.html',     image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZJc5XiKDhpXf5bxAcVmZRGS_tTTElL0eIKw&s' },
 ];
 
 /* ---------------- Tiny helpers ---------------- */
@@ -91,7 +93,9 @@ if (grid) {
   const chips       = $$('#chips .chip');
 
   // Guard against corrupt or tampered localStorage payloads
-  const asUrlList = v => Array.isArray(v) ? v.filter(u => typeof u === 'string') : [];
+  const asUrlList = v => Array.isArray(v)
+    ? v.filter(u => typeof u === 'string').map(u => u.replace(/^\/+/, '')) // migrate old root-relative entries
+    : [];
   let favorites = asUrlList(safeRead('zh_favs', []));      // array of game urls
   let recents   = asUrlList(safeRead('zh_recents', []));   // array of game urls, newest first
   let filter    = 'all';
@@ -258,7 +262,7 @@ if (frame) {
     document.title = `${name} — zj71's Game Hub`;
     if (titleEl) titleEl.textContent = name;
   } else {
-    frame.src = '/';
+    frame.src = './index.html';
     if (titleEl) titleEl.textContent = 'No game selected';
   }
 
