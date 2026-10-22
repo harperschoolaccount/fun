@@ -11,8 +11,11 @@
    • image is optional — a generated gradient tile is used instead.
    • Favorites (★) and Recently played (🕘) are saved in
      localStorage on this browser.
-   • Games open inside game.html, which wraps them in a frame with
-     a back / reload / fullscreen toolbar.
+   • Games open directly inside game.html (external sites are
+     framed straight from their own URLs), with a back / reload /
+     pop-out / fullscreen toolbar. If a site refuses to be
+     embedded, a styled notice explains it with a one-click
+     "open in new tab" fallback.
    ============================================================ */
 
 'use strict';
@@ -20,17 +23,24 @@
 /* ---------------- Data ---------------- */
 
 const GAMES = [
-  { title: 'Tab Chats',               desc: 'The ultimate LAN chatting platform', url: 'games/tc/index.html',            image: 'https://static.vecteezy.com/system/resources/thumbnails/006/692/321/small/chatting-message-icon-template-black-color-editable-chatting-message-icon-symbol-flat-illustration-for-graphic-and-web-design-free-vector.jpg' },
-  { title: 'Random',                  desc: 'Random Shit',                        url: 'games/random/',                  image: '' },
-  { title: 'Five Nights at Freddy\'s',desc: 'Survive five spooky nights',         url: 'games/fnaf/index.html',          image: 'https://play-lh.googleusercontent.com/myJ2kwywsCRglKkZuHBq6Aku9PX7HB75v-8KbnTK9JOPU6z0hpD9xtvjiTGqrn-e4eI' },
-  { title: 'Legion Platforms',        desc: 'Jump across the platforms',          url: 'games/legion platforms/index.html', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMWJcFGLcnAWw-OyIklj9vSImhot9Qja_oVA&s' },
-  { title: 'Minecraft',               desc: 'Classic sandbox building',           url: 'games/mc/index.html',            image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b6/Minecraft_2024_cover_art.png/250px-Minecraft_2024_cover_art.png' },
-  { title: 'Geometry Dash',           desc: 'One-touch rhythm platformer',        url: 'games/gd/index.html',            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCUiJgoAoVVcg9FA3_3NHHC4SkocpWthaYbg&s' },
-  { title: 'Among Us',                desc: 'Find the impostor',                  url: 'games/Among Us.html',            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSL4pC911RR8_8f9fN7T2AYbgBWfH-lv8DX7w&s' },
-  { title: 'Rob a Brainrot 2',        desc: 'The sequel heist',                   url: 'games/Rob a Brainrot 2.html',    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdLxerHkBauEVpdGPdD-GOR2he4ASkez8ylQ&s' },
-  { title: 'Happy Wheels',            desc: 'Physics-based mayhem',               url: 'games/Happy Wheels.html',        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWcm4QoLNNEvP5lvZKJg9WgFLV_UW25k31GQ&s' },
-  { title: 'Plants vs Brainrots',     desc: 'Defend the garden',                  url: 'games/Plants vs Brainrots.html', image: 'https://growagardenio.io/data/image/game/PlantsvsBrainrots.png' },
-  { title: 'Steal Brainrots',         desc: 'Brainrot heist',                     url: 'games/Steal Brainrots.html',     image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZJc5XiKDhpXf5bxAcVmZRGS_tTTElL0eIKw&s' },
+  { title: 'FNAF 1',              desc: 'Survive five spooky nights',         url: 'https://ozgames.io/five-nights-at-freddys.embed',     image: 'https://play-lh.googleusercontent.com/myJ2kwywsCRglKkZuHBq6Aku9PX7HB75v-8KbnTK9JOPU6z0hpD9xtvjiTGqrn-e4eI' },
+  { title: 'Geometry Dash',       desc: 'One-touch rhythm platformer',        url: 'https://ozgames.io/geometry-dash.embed',              image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCUiJgoAoVVcg9FA3_3NHHC4SkocpWthaYbg&s' },
+  { title: 'GD World',            desc: 'A new Geometry Dash journey',        url: 'https://ozgames.io/geometry-dash-world.embed',        image: 'https://play-lh.googleusercontent.com/eu0Lv1QtDbCdVvuphJh84zxKNURIEcXjmZPhAv4NM4Xacfjum9TspfYkzRcBKv4zpDk=w240-h480-rw' },
+  { title: 'Geometry Vibes',      desc: 'Another GD-style challenge',         url: 'https://ozgames.io/geometry-dash-wave.embed',         image: 'https://play-lh.googleusercontent.com/FRj1dX1U-hdtQVSZkEtjzyo1iRh-cVGidQwMo_Mcp_-HBvVw7ojiEhayL7wrsOQNLOk' },
+  { title: 'Minecraft',           desc: 'Eaglercraft 1.8, in your browser',   url: 'games/mc/ULTIMATE 1.8 zj71 eagler craft.html',        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b6/Minecraft_2024_cover_art.png/250px-Minecraft_2024_cover_art.png' },
+  { title: 'Minecraft 1.12',      desc: 'Eaglercraft 1.12, in your browser',  url: 'games/mc/Eaglercraft_1.12_Offline_en_US.html',        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b6/Minecraft_2024_cover_art.png/250px-Minecraft_2024_cover_art.png' },
+  { title: 'Among Us',            desc: 'Find the impostor',                  url: 'https://ozgames.io/among-us.embed',                   image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSL4pC911RR8_8f9fN7T2AYbgBWfH-lv8DX7w&s' },
+  { title: 'Happy Wheels',        desc: 'Physics-based mayhem',               url: 'https://ozgames.io/happy-wheels.embed',               image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWcm4QoLNNEvP5lvZKJg9WgFLV_UW25k31GQ&s' },
+  { title: 'Kour.io',             desc: 'Online FPS battles',                 url: 'https://kour.io',                                     image: 'https://play-lh.googleusercontent.com/-7D4gqeabC8nF4bSxsrTf3IgnbVP7fL-Bq3jLo6507VcwNe28WSR8ufykib-QZULrq8=w240-h480-rw' },
+  { title: 'Kourstrike.io',       desc: 'Tactical shooter',                   url: 'https://kourstrike.io',                               image: 'https://legionmain.netlify.app/res/scopeditems/kourstrike.io.png' },
+  { title: 'Overtide.io',         desc: 'Multiplayer shooter',                url: 'https://overtide.io',                                 image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4igXR8ZVbHu1uKa7r8nM8wVFJDFjBmrN81w&s' },
+  { title: 'Veck.io',             desc: 'Fast arena shooter',                 url: 'https://veck.io',                                     image: 'https://kizgame.com/thumbs/veck-io_2.webp' },
+  { title: 'UNO Online',          desc: 'Shed your cards first to win',       url: 'https://ozgames.io/uno-online.embed',                 image: '' },
+  { title: 'Ragdoll Playground',  desc: 'Physics sandbox ragdolls',           url: 'https://ozgames.io/ragdoll-playground.embed',         image: '' },
+  { title: 'Plants vs Brainrots', desc: 'Defend the garden',                  url: 'https://ozgames.io/plants-vs-brainrots-online.embed', image: 'https://growagardenio.io/data/image/game/PlantsvsBrainrots.png' },
+  { title: 'Steal Brainrots',     desc: 'Brainrot heist',                     url: 'https://ozgames.io/steal-brainrots.embed',            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZJc5XiKDhpXf5bxAcVmZRGS_tTTElL0eIKw&s' },
+  { title: 'Rob a Brainrot 2',    desc: 'The sequel heist',                   url: 'https://ozgames.io/rob-brainrot-2-0.embed',           image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdLxerHkBauEVpdGPdD-GOR2he4ASkez8ylQ&s' },
+  { title: 'Tab Chats',           desc: 'The ultimate LAN chatting platform', url: 'https://tabchats.lovable.app/',                       image: 'https://static.vecteezy.com/system/resources/thumbnails/006/692/321/small/chatting-message-icon-template-black-color-editable-chatting-message-icon-symbol-flat-illustration-for-graphic-and-web-design-free-vector.jpg' },
 ];
 
 /* ---------------- Tiny helpers ---------------- */
@@ -66,7 +76,7 @@ window.goBack = function () {
   if (history.length > 1 && document.referrer) {
     history.back();
   } else {
-    window.location.href = '/';
+    window.location.href = './index.html';
   }
 };
 
@@ -92,9 +102,38 @@ if (grid) {
   const countEl     = $('#gameCount');
   const chips       = $$('#chips .chip');
 
-  // Guard against corrupt or tampered localStorage payloads
+  // Guard against corrupt or tampered localStorage payloads, and
+  // migrate entries saved by older versions (root-relative paths,
+  // wrapper pages, group pages) to the current direct game URLs.
+  const LEGACY_URL_MAP = {
+    'games/tc/index.html':                    'https://tabchats.lovable.app/',
+    'games/fnaf/index.html':                  'https://ozgames.io/five-nights-at-freddys.embed',
+    'games/fnaf/FNAF.html':                   'https://ozgames.io/five-nights-at-freddys.embed',
+    'games/gd/index.html':                    'https://ozgames.io/geometry-dash.embed',
+    'games/gd/Geometry Dash (kids).html':     'https://ozgames.io/geometry-dash.embed',
+    'games/gd/GD World.html':                 'https://ozgames.io/geometry-dash-world.embed',
+    'games/gd/Geometry Vibes.html':           'https://ozgames.io/geometry-dash-wave.embed',
+    'games/mc/index.html':                    'games/mc/ULTIMATE 1.8 zj71 eagler craft.html',
+    'games/Among Us.html':                    'https://ozgames.io/among-us.embed',
+    'games/Happy Wheels.html':                'https://ozgames.io/happy-wheels.embed',
+    'games/UNO Online.html':                  'https://ozgames.io/uno-online.embed',
+    'games/Ragdoll Playground.html':          'https://ozgames.io/ragdoll-playground.embed',
+    'games/Plants vs Brainrots.html':         'https://ozgames.io/plants-vs-brainrots-online.embed',
+    'games/Steal Brainrots.html':             'https://ozgames.io/steal-brainrots.embed',
+    'games/Rob a Brainrot 2.html':            'https://ozgames.io/rob-brainrot-2-0.embed',
+    'games/legion platforms/index.html':      'https://kour.io',
+    'games/legion platforms/kour.io.html':    'https://kour.io',
+    'games/legion platforms/kourstrike.io.html': 'https://kourstrike.io',
+    'games/legion platforms/overtide.io.html':   'https://overtide.io',
+    'games/legion platforms/veck.io.html':       'https://veck.io',
+    'games/random/':                          null, // placeholder page, not a real game — drop it
+  };
+  const migrateUrl = stored => {
+    const cleaned = String(stored).replace(/^\/+/, '');
+    return cleaned in LEGACY_URL_MAP ? LEGACY_URL_MAP[cleaned] : cleaned;
+  };
   const asUrlList = v => Array.isArray(v)
-    ? v.filter(u => typeof u === 'string').map(u => u.replace(/^\/+/, '')) // migrate old root-relative entries
+    ? v.filter(u => typeof u === 'string').map(migrateUrl).filter(Boolean)
     : [];
   let favorites = asUrlList(safeRead('zh_favs', []));      // array of game urls
   let recents   = asUrlList(safeRead('zh_recents', []));   // array of game urls, newest first
@@ -246,6 +285,18 @@ if (grid) {
 }
 
 /* ============================================================
+   LEGACY GROUP PAGES (games/gd/, games/mc/, games/fnaf/, …)
+   Old menu pages whose buttons carry data-url. The hub now links
+   to individual games directly, but these pages can still be
+   reached via old saved "Recent" entries — so make them work.
+   ============================================================ */
+
+document.querySelectorAll('.card-button[data-url]').forEach(btn => {
+  const dest = btn.dataset.url;
+  if (dest) btn.addEventListener('click', () => { window.location.href = dest; });
+});
+
+/* ============================================================
    GAME PAGE (game.html)
    ============================================================ */
 
@@ -273,6 +324,51 @@ if (frame) {
     } catch {
       frame.src = frame.src; // cross-origin fallback
     }
+  });
+
+  $('#openBtn')?.addEventListener('click', () => {
+    // Escape hatch for sites that refuse to be embedded. If the popup
+    // is blocked, navigate this window instead so the button always
+    // does something.
+    if (!url) return;
+    const win = window.open(url, '_blank', 'noopener');
+    if (!win) window.location.href = url;
+  });
+
+  // Detect embedding refused by the site (X-Frame-Options / CSP /
+  // server-side 403). A cross-origin load throws on access — that
+  // means it loaded fine. A refused frame reports either a null
+  // document (Chromium) or an about:blank document (Firefox).
+  const notice = $('#frameNotice');
+  let host = '';
+  try { host = url ? new URL(url, location.href).hostname : ''; } catch { /* relative */ }
+
+  frame.addEventListener('load', () => {
+    setTimeout(() => {
+      if (!url) return;
+      try {
+        const doc = frame.contentDocument;
+        const href = doc && doc.location ? doc.location.href : null;
+        if (doc === null || href === 'about:blank') {
+          if (host) {
+            const el = $('#noticeText');
+            el.innerHTML = `<strong>${host} won't run inside the frame</strong><br>this portal only allows embedding from sites it has approved — play it directly instead.`;
+          }
+          notice.hidden = false;
+        }
+      } catch { /* cross-origin page loaded successfully */ }
+    }, 150);
+  });
+
+  $('#noticePlayBtn')?.addEventListener('click', () => {
+    if (!url) return;
+    const win = window.open(url, '_blank', 'noopener');
+    if (!win) window.location.href = url;
+  });
+
+  $('#noticeRetryBtn')?.addEventListener('click', () => {
+    notice.hidden = true;
+    frame.src = url; // re-attempt the frame load
   });
 
   $('#fullscreenBtn')?.addEventListener('click', toggleFullscreen);

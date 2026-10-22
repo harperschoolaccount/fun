@@ -27,6 +27,12 @@
       </svg>
       <span class="opt-label">Reload</span>
     </button>
+    <button class="tb-btn" id="openBtn" title="Open game in a new tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M14 5h5v5m0-5-9 9M9 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/>
+      </svg>
+      <span class="opt-label">Open</span>
+    </button>
     <button class="tb-btn" id="fullscreenBtn" title="Fullscreen (F)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -48,6 +54,18 @@
 
   <iframe id="gameFrame" class="game-frame" src="about:blank"
           allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+
+  <div class="frame-notice" id="frameNotice" hidden>
+    <p id="noticeText"><strong>This site won't run inside the frame</strong><br>the portal only allows sites it has approved.</p>
+    <div class="notice-actions">
+      <button class="tb-btn primary" id="noticePlayBtn">
+        <span>Play in a new tab</span>
+      </button>
+      <button class="tb-btn" id="noticeRetryBtn">
+        <span>Retry in frame</span>
+      </button>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>

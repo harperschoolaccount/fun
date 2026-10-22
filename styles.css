@@ -486,8 +486,7 @@ body.topbar-hidden .topbar { transform: translateY(-100%); }
 .tb-float {
   position: fixed;
   top: 10px;
-  left: 10px;
-  z-index: 1001;
+  left: 10px;  z-index: 1001;
   width: 38px;
   height: 38px;
   display: grid;
@@ -504,6 +503,62 @@ body.topbar-hidden .topbar { transform: translateY(-100%); }
 
 body.topbar-hidden .tb-float { opacity: 1; pointer-events: auto; }
 .tb-float:hover { background: var(--surface-2); }
+
+/* ---------------- Legacy group-page buttons ---------------- */
+
+.card-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.card-button:hover { background: var(--surface-2); border-color: var(--border-2); }
+
+.card-button .card-title { font-size: 14.5px; font-weight: 600; }
+
+.card-button .card-description {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ---------------- Embed-blocked fallback ---------------- */
+
+.frame-notice {
+  position: fixed;
+  inset: 52px 0 0 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 18px;
+  background: var(--bg);
+  text-align: center;
+}
+
+body.topbar-hidden .frame-notice { inset: 0; }
+
+.frame-notice[hidden] { display: none; }
+
+.frame-notice p {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.9;
+}
+
+.frame-notice p strong { color: var(--text); font-weight: 600; }
+
+.notice-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
 /* ============================================================
    LEGACY GAME-VIEWER STYLES (older pages)
