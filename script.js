@@ -13,9 +13,11 @@
      localStorage on this browser.
    • Games open directly inside game.html (external sites are
      framed straight from their own URLs), with a back / reload /
-     pop-out / fullscreen toolbar. If a site refuses to be
-     embedded, a styled notice explains it with a one-click
-     "open in new tab" fallback.
+     pop-out / fullscreen toolbar. If a portal refuses the frame,
+     the viewer silently retries from inside a data: page (the
+     same conditions as opening from a plain file:// page) before
+     showing a styled notice with a one-click "open in new tab"
+     fallback.
    ============================================================ */
 
 'use strict';
@@ -343,6 +345,20 @@ if (frame) {
   let host = '';
   try { host = url ? new URL(url, location.href).hostname : ''; } catch { /* relative */ }
 
+  // Some game portals refuse an iframe that comes from a real page
+  // (foreign Referer / cross-site fetch header) but happily load when
+  // nothing identifies the parent — e.g. a plain file:// page. We
+  // reproduce those conditions here: the first attempt sends no
+  // Referer (frame attribute), and on refusal we retry from inside a
+  // data: page, which the browser treats as a parent with no origin.
+  function wrapperSrc(u) {
+    const doc = '<!DOCTYPE html><body style="margin:0;overflow:hidden">'
+      + '<iframe src="' + u + '" allow="fullscreen; autoplay; gamepad" allowfullscreen '
+      + 'referrerpolicy="no-referrer" style="border:0;width:100vw;height:100vh"></iframe></body>';
+    return 'data:text/html;charset=utf-8,' + encodeURIComponent(doc);
+  }
+
+  let wrapped = false;
   frame.addEventListener('load', () => {
     setTimeout(() => {
       if (!url) return;
@@ -350,6 +366,11 @@ if (frame) {
         const doc = frame.contentDocument;
         const href = doc && doc.location ? doc.location.href : null;
         if (doc === null || href === 'about:blank') {
+          if (!wrapped) {
+            wrapped = true;       // first strike: retry under file-like conditions
+            frame.src = wrapperSrc(url);
+            return;
+          }
           if (host) {
             const el = $('#noticeText');
             el.innerHTML = `<strong>${host} won't run inside the frame</strong><br>this portal only allows embedding from sites it has approved — play it directly instead.`;
@@ -368,7 +389,8 @@ if (frame) {
 
   $('#noticeRetryBtn')?.addEventListener('click', () => {
     notice.hidden = true;
-    frame.src = url; // re-attempt the frame load
+    wrapped = false;
+    frame.src = url;
   });
 
   $('#fullscreenBtn')?.addEventListener('click', toggleFullscreen);
